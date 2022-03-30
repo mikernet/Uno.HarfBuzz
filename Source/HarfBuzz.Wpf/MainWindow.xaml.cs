@@ -27,7 +27,6 @@ namespace HarfBuzz.Wpf
         private const int Iterations = 1000;
         private const string SampleText = ".e\u0300This is a sample line of text to draw.";
         private const string FontFace = "Arial";
-        private new const float FontSize = 18;
 
         private const int HBCustomFontScale = 512;
 
@@ -39,7 +38,7 @@ namespace HarfBuzz.Wpf
             IsAntialias = true,
             Style = SKPaintStyle.Fill,
             TextAlign = SKTextAlign.Left,
-            TextSize = FontSize,
+            TextSize = 18,
             TextEncoding = SKTextEncoding.Utf16,
         };
 
@@ -106,7 +105,7 @@ namespace HarfBuzz.Wpf
                 if (clear)
                     _swapCanvas.Clear(SKColors.White);
 
-                var result = _hbShaper.Shape(SampleText, 0, FontSize, _paint);
+                var result = _hbShaper.Shape(SampleText, 0, _paint.TextSize, _paint);
 
                 using var builder = new SKTextBlobBuilder();
                 var run = builder.AllocatePositionedRun(_paint.ToFont(), result.Codepoints.Length);
@@ -159,7 +158,7 @@ namespace HarfBuzz.Wpf
                 float textSizeX = textSizeY * _paint.TextScaleX;
 
                 using var builder = new SKTextBlobBuilder();
-                var run = builder.AllocateHorizontalRun(_paint.ToFont(), length, FontSize);
+                var run = builder.AllocateHorizontalRun(_paint.ToFont(), length, _paint.TextSize);
 
                 var glyphs = run.GetGlyphSpan();
                 var positions = run.GetPositionSpan();

@@ -1,4 +1,5 @@
 ﻿using SkiaSharp;
+using SkiaSharp.HarfBuzz;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -24,12 +25,13 @@ namespace HarfBuzz.Wpf
     public partial class MainWindow : Window
     {
         private const int Iterations = 1000;
-        private const string Text = "This is a sample line of text to draw.";
+        private const string SampleText = "This is a sample line of text to draw.";
         private const string FontFace = "Arial";
-        private new const int FontSize = 12;
+        private new const float FontSize = 18;
 
-        private static SKFont _font = SKTypeface.FromFamilyName(FontFace).ToFont();
-        private static SKPaint _paint = new SKPaint(_font)
+        private static readonly SKTypeface _typeFace = SKTypeface.FromFamilyName(FontFace);
+        private static readonly SKFont _font = _typeFace.ToFont();
+        private static readonly SKPaint _paint = new SKPaint(_font)
         {
             Color = SKColors.Black,
             IsAntialias = true,
@@ -38,15 +40,16 @@ namespace HarfBuzz.Wpf
             TextSize = FontSize,
         };
 
-        private static SKBitmap _swapBitmap = new SKBitmap(300, 100, true);
-        private static SKCanvas _swapCanvas = new SKCanvas(_swapBitmap);
+        private static readonly SKShaper _hbShaper = new SKShaper(SKTypeface.FromFamilyName(FontFace));
 
-        private static HB.Font _hbFont = new HB.Font(new HB.Face(HB.Blob.FromFile(Environment.GetFolderPath(Environment.SpecialFolder.Fonts) + "\\arial.ttf"), 0));
-
-        private static HB.Buffer _hbBuffer = new();
+        private SKBitmap _swapBitmap;
+        private SKCanvas _swapCanvas;
 
         public MainWindow()
         {
+            _swapBitmap = new SKBitmap(300, 100, true);
+            _swapCanvas = new SKCanvas(_swapBitmap);
+
             InitializeComponent();
         }
 
@@ -62,13 +65,12 @@ namespace HarfBuzz.Wpf
                 if (clear)
                     _swapCanvas.Clear(SKColors.White);
 
-                _swapCanvas.DrawText(Text, 0, _paint.TextSize, _paint);
+                _swapCanvas.DrawText(SampleText, 0, _paint.TextSize, _paint);
             }
 
             sw.Stop();
 
             ResultText.Text = $"Elapsed time for {Iterations} iterations: {sw.ElapsedMilliseconds}ms";
-
             DrawingElement.InvalidateVisual();
         }
 
@@ -84,35 +86,31 @@ namespace HarfBuzz.Wpf
                 if (clear)
                     _swapCanvas.Clear(SKColors.White);
 
-                _hbBuffer.ClearContents();
-                _hbBuffer.Direction = HB.Direction.LeftToRight;
-                _hbBuffer.AddUtf16(Text);
-                _hbFont.Shape(_hbBuffer);
+                var result = _hbShaper.Shape(SampleText, 0, FontSize, _paint);
 
-                var glyphsInfos = _hbBuffer.GetGlyphInfoSpan();
-                var glyphPositions = _hbBuffer.GetGlyphPositionSpan();
+                using var builder = new SKTextBlobBuilder();
+                var run = builder.AllocatePositionedRun(_paint.ToFont(), result.Codepoints.Length);
 
-                int x = FontSize;
-                int y = 0;
+                // copy the glyphs
+                var glyphs = run.GetGlyphSpan();
+                var positions = run.GetPositionSpan();
 
-                for (int g = 0; g < glyphsInfos.Length; g++)
+                for (int g = 0; g < result.Codepoints.Length; g++)
                 {
-                    var info = glyphsInfos[g];
-                    var position = glyphPositions[g];
-
-                    _swapCanvas.DrawText(char.ConvertFromUtf32((int)info.Codepoint), x + position.XOffset, y + position.YOffset, _paint);
-
-                    x += position.XAdvance;
-                    y += position.YAdvance;
+                    glyphs[g] = (ushort)result.Codepoints[g];
+                    positions[g] = result.Points[g];
                 }
 
-                _swapCanvas.DrawText(Text, 0, _paint.TextSize, _paint);
+                // build
+                using var textBlob = builder.Build();
+
+                // draw the text
+                _swapCanvas.DrawText(textBlob, 0, 0, _paint);
             }
 
             sw.Stop();
 
             ResultText.Text = $"Elapsed time for {Iterations} iterations: {sw.ElapsedMilliseconds}ms";
-
             DrawingElement.InvalidateVisual();
         }
 

@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:HarfBuzz.Wpf"
         xmlns:skia="clr-namespace:SkiaSharp.Views.WPF;assembly=SkiaSharp.Views.WPF"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="800" FontSize="14">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -17,7 +17,7 @@
         <StackPanel Orientation="Horizontal">
             <Button Content="Bare SkiaSharp Test" Click="OnBareSkiaSharpTestClick"/>
             <Button Content="HarfBuzz Shaping Test" Click="OnHarfBuzzShapingTest"/>
-            <CheckBox x:Name="ClearCanvasCheckbox" Content="Clear canvas between iterations" IsChecked="True"/>
+            <CheckBox x:Name="ClearCanvasCheckbox" Content="Clear canvas between iterations" IsChecked="True" VerticalAlignment="Center"/>
         </StackPanel>
 
         <skia:SKElement x:Name="DrawingElement" Grid.Row="1" PaintSurface="OnPaintSurface" />

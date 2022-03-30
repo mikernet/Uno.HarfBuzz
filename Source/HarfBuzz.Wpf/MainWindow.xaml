@@ -15,8 +15,9 @@
         </Grid.RowDefinitions>
 
         <StackPanel Orientation="Horizontal">
-            <Button Content="Bare SkiaSharp Test" Click="OnBareSkiaSharpTestClick"/>
-            <Button Content="HarfBuzz Shaping Test" Click="OnHarfBuzzShapingTest"/>
+            <Button Content="Bare SkiaSharp" Click="OnBareSkiaSharpTestClick"/>
+            <Button Content="HarfBuzz Shaper" Click="OnHarfBuzzShaperTest"/>
+            <Button Content="HarfBuzz Custom" Click="OnHarfBuzzCustomTest"/>
             <CheckBox x:Name="ClearCanvasCheckbox" Content="Clear canvas between iterations" IsChecked="True" VerticalAlignment="Center"/>
         </StackPanel>
 

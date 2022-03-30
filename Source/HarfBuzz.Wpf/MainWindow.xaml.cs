@@ -25,7 +25,7 @@ namespace HarfBuzz.Wpf
     public partial class MainWindow : Window
     {
         private const int Iterations = 1000;
-        private const string SampleText = "This is a sample line of text to draw.";
+        private const string SampleText = ".e\u0300This is a sample line of text to draw.";
         private const string FontFace = "Arial";
         private new const float FontSize = 18;
 
@@ -160,6 +160,7 @@ namespace HarfBuzz.Wpf
 
                 using var builder = new SKTextBlobBuilder();
                 var run = builder.AllocateHorizontalRun(_paint.ToFont(), length, FontSize);
+
                 var glyphs = run.GetGlyphSpan();
                 var positions = run.GetPositionSpan();
 
